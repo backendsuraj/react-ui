@@ -1,0 +1,68 @@
+/* Global reset for margins and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Full-screen background with a gentle gradient */
+.itmWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(180deg, #141E30, #243B55);
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Box that contains the content */
+.itmBox {
+    text-align: center;
+    padding: 40px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Main header for the app */
+.itmHeader {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    color: #f7f7f7;
+}
+
+/* Subtitle beneath the header */
+.itmSubtitle {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #dcdcdc;
+}
+
+/* Styling for the connect button */
+.itmConnectBtn {
+    font-size: 1.4rem;
+    padding: 15px 50px;
+    background-color: #ff5722;
+    border: none;
+    border-radius: 30px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0px 12px 24px rgba(255, 87, 34, 0.3);
+}
+
+/* Button hover and active effects */
+.itmConnectBtnHover {
+    background-color: #e64a19;
+    box-shadow: 0px 15px 30px rgba(255, 87, 34, 0.6);
+    transform: translateY(-3px);
+}
+
+.itmConnectBtnActive {
+    transform: translateY(1px);
+    box-shadow: 0px 8px 16px rgba(255, 87, 34, 0.3);
+}

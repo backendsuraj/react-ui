@@ -1,0 +1,207 @@
+/* Reset margin and padding on the body */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.teams-call-ui {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #2b2b2b;
+  color: white;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.recording-icon {
+  margin-right: 10px;
+}
+
+.meeting-time {
+  font-size: 16px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-button {
+  margin-left: 10px;
+  padding: 8px 12px;
+  background-color: #3c3c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.header-button.end-call {
+  background-color: red;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.video-area {
+  flex: 1;
+  background-color: black;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-area {
+  width: 300px;
+  background-color: black;
+}
+
+.participant-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+}
+
+.participant {
+  position: relative;
+}
+
+.participant.full {
+  flex: 1;
+}
+
+.participant.local {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  height: 150px;
+}
+
+.video-placeholder {
+  background-color: #555;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.video-placeholder .initial {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.video-placeholder .full-name {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px; /* Increased padding */
+  border-radius: 4px;
+}
+
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  height: 100%;
+  align-content: start;
+  overflow-y: auto;
+}
+
+.participant.card {
+  position: relative;
+}
+
+.participant.card::before {
+  content: '';
+  display: block;
+  padding-top: 75%; /* Aspect ratio of 4:3 */
+}
+
+.participant.card .video-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.carousel-wrapper input[type="radio"] {
+  display: none;
+}
+
+.carousel-page {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+}
+
+#carousel-0:checked ~ .carousel-page:nth-of-type(1),
+#carousel-1:checked ~ .carousel-page:nth-of-type(2),
+#carousel-2:checked ~ .carousel-page:nth-of-type(3),
+#carousel-3:checked ~ .carousel-page:nth-of-type(4),
+#carousel-4:checked ~ .carousel-page:nth-of-type(5) {
+  display: block;
+}
+
+.carousel-navigation {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+#carousel-0:checked ~ .carousel-navigation label:nth-child(1),
+#carousel-1:checked ~ .carousel-navigation label:nth-child(2),
+#carousel-2:checked ~ .carousel-navigation label:nth-child(3),
+#carousel-3:checked ~ .carousel-navigation label:nth-child(4),
+#carousel-4:checked ~ .carousel-navigation label:nth-child(5) {
+  background-color: #888;
+}
+
+@media screen and (max-width: 768px) {
+  .participants-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

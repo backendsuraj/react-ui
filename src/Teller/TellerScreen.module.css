@@ -1,0 +1,212 @@
+/* Root Variables */
+:root {
+  --primary-color: #16a085; /* Teal for primary buttons */
+  --secondary-color: #e74c3c; /* Coral for supervise buttons */
+  --background-color: #ecf0f1; /* Cool light grey background */
+  --text-color: #2c3e50; /* Dark grey for text */
+  --title-color: #ffffff; /* White text for headers */
+  --header-bg-color: #34495e; /* Bold navy blue for the header */
+  --button-background-color: #1abc9c; /* Brighter teal for accept button */
+  --button-hover-background-color: #148f77;
+  --button-join-bg: #3498db; /* Blue for join button */
+  --button-join-hover-bg: #2980b9;
+  --button-supervise-bg: #f39c12; /* Orange for supervise button */
+  --button-supervise-hover-bg: #e67e22;
+  --button-text-color: #ffffff;
+  --border-color: #dcdde1; /* Light grey borders */
+  --table-header-bg: #bdc3c7; /* Light grey-blue for table headers */
+  --table-alt-row-bg: #f7f7f7; /* Very light grey for alternate rows */
+  --table-hover-bg: #dfe6e9; /* Soft grey for row hover */
+  --input-section-bg: #ffffff; /* White background for input section */
+}
+
+/* Global Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.container {
+  padding: 40px;
+}
+
+/* Header */
+.header {
+  background-color: var(--header-bg-color);
+  padding: 20px 40px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.dashboardTitle {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--title-color);
+}
+
+/* Join Section */
+.joinSection {
+  background-color: var(--input-section-bg); /* White background */
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.usernameInput {
+  padding: 15px;
+  font-size: 18px; /* Larger input size */
+  border: 1px solid var(--border-color);
+  border-radius: 12px; /* More rounded corners */
+  margin-right: 15px;
+  width: 350px; /* Increased width */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow inside */
+  transition: all 0.3s ease;
+}
+
+.usernameInput:focus {
+  outline: none;
+  border-color: var(--primary-color); /* Focus state border */
+  box-shadow: 0 0 8px rgba(22, 160, 133, 0.4); /* Teal glow */
+}
+
+.joinButton {
+  padding: 15px 30px; /* Increased size */
+  background-color: var(--button-join-bg); /* Unique blue color for join */
+  color: var(--button-text-color);
+  border: none;
+  border-radius: 12px; /* More rounded corners */
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.joinButton:hover {
+  background-color: var(--button-join-hover-bg); /* Darker blue on hover */
+  transform: translateY(-2px); /* Lift on hover */
+}
+
+/* Main Content */
+.mainContent {
+  display: flex;
+  gap: 40px;
+  justify-content: space-between;
+}
+
+.tableSection {
+  flex: 1;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+/* Table */
+.callTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 16px;
+}
+
+.callTable th,
+.callTable td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.callTable th {
+  background-color: var(--table-header-bg);
+  color: var(--text-color);
+}
+
+.callTable tbody tr:nth-child(even) {
+  background-color: var(--table-alt-row-bg); /* Alternate row color */
+}
+
+.callTable tbody tr:hover {
+  background-color: var(--table-hover-bg); /* Row hover effect */
+}
+
+/* No Calls Message */
+.noCalls {
+  text-align: center;
+  font-size: 16px;
+  color: var(--text-color);
+  padding: 20px;
+}
+
+/* Button Styles */
+button {
+  padding: 12px 20px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.acceptButton {
+  background-color: var(--button-background-color); /* Teal for Accept */
+  color: var(--button-text-color);
+}
+
+.acceptButton:hover {
+  background-color: var(--button-hover-background-color); /* Darker teal */
+  transform: translateY(-2px);
+}
+
+.superviseButton {
+  background-color: var(--button-supervise-bg); /* Coral for Supervise */
+  color: var(--button-text-color);
+}
+
+.superviseButton:hover {
+  background-color: var(--button-supervise-hover-bg); /* Darker coral */
+  transform: translateY(-2px);
+}
+
+.joinButton {
+  background-color: var(--button-join-bg); /* Blue for Join */
+  color: var(--button-text-color);
+}
+
+.joinButton:hover {
+  background-color: var(--button-join-hover-bg); /* Darker blue on hover */
+  transform: translateY(-2px);
+}
+
+/* Spacing between buttons in In Progress Calls */
+.actionGroup button {
+  margin-right: 10px;
+}
+
+.actionGroup button:last-child {
+  margin-right: 0; /* Remove margin for the last button */
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .mainContent {
+    flex-direction: column;
+  }
+
+  .tableSection {
+    margin-bottom: 20px;
+  }
+}
