@@ -74,8 +74,8 @@ const Teams: React.FC = () => {
             return (
               <div className="carousel-page" key={`page-${i}`}>
                 <div className="participants-grid">
-                  {pageParticipants.map((participant) => (
-                    <div key={participant.id} className="participant card">
+                  {pageParticipants.map((participant, idx) => (
+                    <div key={participant.id} className={`participant card ${idx === 3 ? 'speaking' : ''}`}>
                       <div className="video-placeholder">
                         <span className="initial">{participant.name.charAt(0)}</span>
                         <span className="full-name">{participant.name}</span>

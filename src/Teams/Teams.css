@@ -102,9 +102,19 @@ body {
   height: 100%;
 }
 
+/* Circle with the initial */
 .video-placeholder .initial {
   font-size: 36px;
   font-weight: bold;
+  width: 60px;
+  height: 60px;
+  background-color: #3c3c3c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
 }
 
 .video-placeholder .full-name {
@@ -203,5 +213,54 @@ body {
 @media screen and (max-width: 768px) {
   .participants-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Glowing and ripple effect when speaking */
+.speaking .initial {
+  position: relative;
+  animation: pulse 1.5s infinite ease-in-out;
+  box-shadow: 0px 0px 15px 5px rgba(0, 123, 255, 0.7);
+}
+
+/* Ripple effect with expanding circles */
+.speaking .initial::before, .speaking .initial::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0, 123, 255, 0.3);
+  animation: ripple 1.5s infinite ease-out;
+}
+
+.speaking .initial::after {
+  animation-delay: 0.75s; /* To create the staggered ripple effect */
+}
+
+/* Keyframes for the pulse effect */
+@keyframes pulse {
+  0% {
+    box-shadow: 0px 0px 15px 5px rgba(0, 123, 255, 0.7);
+  }
+  50% {
+    box-shadow: 0px 0px 30px 10px rgba(0, 123, 255, 0.2);
+  }
+  100% {
+    box-shadow: 0px 0px 15px 5px rgba(0, 123, 255, 0.7);
+  }
+}
+
+/* Ripple keyframes for expanding circles */
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
   }
 }
