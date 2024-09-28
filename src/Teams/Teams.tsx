@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Teams.css';
 
 const Teams: React.FC = () => {
@@ -13,12 +13,23 @@ const Teams: React.FC = () => {
     // Add more participants as needed
   ];
 
+  const [simpleChatMessages, setSimpleChatMessages] = useState([
+    { id: 1, sender: 'Alice', text: 'Hey, how is the meeting going?' },
+    { id: 2, sender: 'Bob', text: 'It’s going well, thanks!' },
+    { id: 3, sender: 'You', text: 'I just shared my screen.' },
+    { id: 4, sender: 'Alice', text: 'Great, I can see it.' },
+    { id: 5, sender: 'You', text: 'Perfect, let’s proceed then.' },
+  ]); // Initial chat data
+  
+  const [newMessage, setNewMessage] = useState("");
+
   const meetingTime = '00:15:23'; // Example meeting time
   const isRecording = true;       // Example recording status
 
   // Number of participants per page (2 rows of 3 participants)
   const participantsPerPage = 6;
   const totalPages = Math.ceil(participants.length / participantsPerPage);
+  const [chatType, setChatType] = useState('simple'); // 'simple' or 'ai'
 
   const renderParticipants = () => {
     if (participants.length <= 2) {
@@ -102,11 +113,50 @@ const Teams: React.FC = () => {
     }
   };
 
+  const renderChat = () => {
+    if (chatType === 'simple') {
+      return (
+        <>
+          <div className="chat-messages">
+            {simpleChatMessages.map((message) => (
+              <div key={message.id} className={`chat-message ${message.sender === 'You' ? 'my-message' : ''}`}>
+                <strong>{message.sender}: </strong> {message.text}
+              </div>
+            ))}
+          </div>
+          <div className="chat-input">
+            <input
+              type="text"
+              value={newMessage}
+              placeholder="Type a message..."
+              onChange={(e) => setNewMessage(e.target.value)}
+            />
+            <button
+              onClick={() => {
+                if (newMessage.trim()) {
+                  setSimpleChatMessages([
+                    ...simpleChatMessages,
+                    { id: simpleChatMessages.length + 1, sender: 'You', text: newMessage }
+                  ]);
+                  setNewMessage("");
+                }
+              }}
+            >
+              Send
+            </button>
+          </div>
+        </>
+      );
+    } else {
+      return <div>AI Chat</div>;
+    }
+  };
+
   return (
     <div className="teams-call-ui">
       <header className="header">
         <div className="header-left">
-          {isRecording && <span className="recording-icon">🔴</span>}
+          {isRecording && <span className="recording-icon"></span>}
           <span className="meeting-time">{meetingTime}</span>
         </div>
         <div className="header-right">
@@ -118,7 +168,21 @@ const Teams: React.FC = () => {
       </header>
       <div className="main-content">
         <div className="video-area">{renderParticipants()}</div>
-        <div className="chat-area"></div>
+        <div className="chat-area">
+          {/* Toggle buttons for chat types */}
+          <div className="chat-toggle">
+            <button onClick={() => setChatType('simple')} className={chatType === 'simple' ? 'active' : ''}>
+              Simple Chat
+            </button>
+            <button onClick={() => setChatType('ai')} className={chatType === 'ai' ? 'active' : ''}>
+              AI Chat
+            </button>
+          </div>
+          {/* Render the chat based on the selected type */}
+          <div className="chat-content">
+            {renderChat()}
+          </div>
+        </div>
       </div>
     </div>
   );

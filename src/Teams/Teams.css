@@ -66,7 +66,9 @@ body {
 
 .chat-area {
   width: 300px;
-  background-color: black;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Occupy full height of the parent */
 }
 
 .participant-container {
@@ -216,6 +218,100 @@ body {
   }
 }
 
+/*Chat messages*/
+.chat-toggle {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background-color: #2b2b2b;
+  color: white;
+}
+
+.chat-toggle button {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  background-color: #3c3c3c;
+  color: white;
+  border-radius: 4px;
+}
+
+.chat-toggle button.active {
+  background-color: #007bff;
+}
+
+.chat-content {
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 10px 0px 10px 0px;
+  background-color: black;
+}
+
+.chat-messages {
+  flex: 1; /* Take up remaining space and allow scrolling */
+  overflow-y: auto;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 4px;
+  color: white;
+}
+
+.chat-message {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  background-color: #444;
+}
+
+.my-message {
+  background-color: #606060;
+  text-align: right;
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  margin-bottom: 12px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+}
+
+.chat-input input:focus {
+  outline: none;
+  border: none;
+}
+
+.chat-input button {
+  padding: 10px 20px;
+  background-color: #323642;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background-color: #0056b3;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Hide scrollbar for Firefox */
+.chat-messages {
+  scrollbar-width: none; /* Firefox */
+}
+
 /* Glowing and ripple effect when speaking */
 .speaking .initial {
   position: relative;
@@ -264,3 +360,54 @@ body {
     opacity: 0;
   }
 }
+
+/*Recording icon*/
+.recording-icon {
+  width: 20px;
+  height: 20px;
+  /* background-color: red; */
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0px 0px 5px rgba(255, 0, 0, 0.7); /* Optional glow */
+  animation: recodringPulse 1.5s infinite; /* Add pulsing animation */
+}
+
+.recording-icon::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.recording-icon::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+@keyframes recodringPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+  }
+  50% {
+    transform: scale(1.2); /* Grows slightly */
+    box-shadow: 0 0 10px rgba(255, 0, 0, 1); /* Stronger glow */
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
+  }
+}
+
+
+
