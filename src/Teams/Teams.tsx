@@ -6,11 +6,10 @@ const Teams: React.FC = () => {
   const participants = [
     { id: 1, name: 'You' },
     { id: 2, name: 'Alice' },
-    { id: 3, name: 'Bob' },
-    { id: 4, name: 'Charlie' },
-    { id: 5, name: 'Dave' },
-    { id: 6, name: 'Dave' },
-    // Add more participants as needed
+    // { id: 3, name: 'Bob' },
+    // { id: 4, name: 'Charlie' },
+    // { id: 5, name: 'Dave' },
+    // { id: 6, name: 'Eve' },
   ];
 
   const [simpleChatMessages, setSimpleChatMessages] = useState([
@@ -19,17 +18,30 @@ const Teams: React.FC = () => {
     { id: 3, sender: 'You', text: 'I just shared my screen.' },
     { id: 4, sender: 'Alice', text: 'Great, I can see it.' },
     { id: 5, sender: 'You', text: 'Perfect, let’s proceed then.' },
-  ]); // Initial chat data
-  
+  ]); 
+
   const [newMessage, setNewMessage] = useState("");
-
-  const meetingTime = '00:15:23'; // Example meeting time
-  const isRecording = true;       // Example recording status
-
-  // Number of participants per page (2 rows of 3 participants)
+  const meetingTime = '00:15:23'; 
+  const isRecording = true;
   const participantsPerPage = 6;
   const totalPages = Math.ceil(participants.length / participantsPerPage);
-  const [chatType, setChatType] = useState('simple'); // 'simple' or 'ai'
+  const [chatType, setChatType] = useState('simple');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar
+  const [selectedService, setSelectedService] = useState(''); // Track selected service
+  const [chequeImage, setChequeImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleServiceSelection = (serviceType: string) => {
+    setSelectedService(serviceType);
+    if (serviceType === 'Cheque Deposit') {
+      // Simulate receiving the cheque image with loading
+      setIsLoading(true);
+      setTimeout(() => {
+        setChequeImage('/path-to-cheque-image.jpg'); // Replace with actual image path
+        setIsLoading(false);
+      }, 3000); // Simulated delay for image receipt
+    }
+  };
 
   const renderParticipants = () => {
     if (participants.length <= 2) {
@@ -65,7 +77,6 @@ const Teams: React.FC = () => {
     } else {
       return (
         <div className="carousel-wrapper">
-          {/* Radio inputs for carousel control */}
           {Array.from({ length: totalPages }, (_, i) => (
             <input
               type="radio"
@@ -76,7 +87,6 @@ const Teams: React.FC = () => {
             />
           ))}
 
-          {/* Carousel pages */}
           {Array.from({ length: totalPages }, (_, i) => {
             const startIdx = i * participantsPerPage;
             const endIdx = startIdx + participantsPerPage;
@@ -98,7 +108,6 @@ const Teams: React.FC = () => {
             );
           })}
 
-          {/* Carousel navigation dots */}
           <div className="carousel-navigation">
             {Array.from({ length: totalPages }, (_, idx) => (
               <label
@@ -164,12 +173,13 @@ const Teams: React.FC = () => {
           <button className="header-button">Turn Video Off</button>
           <button className="header-button">Share Screen</button>
           <button className="header-button end-call">End Call</button>
+          <button className="header-button" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>Services</button>
         </div>
       </header>
+
       <div className="main-content">
         <div className="video-area">{renderParticipants()}</div>
         <div className="chat-area">
-          {/* Toggle buttons for chat types */}
           <div className="chat-toggle">
             <button onClick={() => setChatType('simple')} className={chatType === 'simple' ? 'active' : ''}>
               Simple Chat
@@ -178,12 +188,69 @@ const Teams: React.FC = () => {
               AI Chat
             </button>
           </div>
-          {/* Render the chat based on the selected type */}
           <div className="chat-content">
             {renderChat()}
           </div>
         </div>
       </div>
+
+      {/* Sidebar for services */}
+      {isSidebarOpen && (
+  <div className="services-sidebar">
+    <div className="services-top-bar">
+      <h2>Select Service</h2>
+      <button className="close-button" onClick={() => setIsSidebarOpen(false)}>×</button>
+    </div>
+
+    {/* Dropdown for service selection */}
+    <div className="service-dropdown">
+      <label htmlFor="serviceSelect">Choose a service:</label>
+      <select id="serviceSelect" onChange={(e) => handleServiceSelection(e.target.value)}>
+        <option value="">-- Select a Service --</option>
+        <option value="Cheque Deposit">Cheque Deposit</option>
+        <option value="Cheque Encashment">Cheque Encashment</option>
+        {/* Add more services as needed */}
+      </select>
+    </div>
+
+    {selectedService && (
+      <div className="service-status">
+        <p>Selected Service: {selectedService}</p>
+        {isLoading ? (
+          <div className="loader-container">
+            <div className="loader"></div> {/* Loader */}
+          </div>
+        ) : (
+          chequeImage && (
+            <>
+              <img src="https://via.placeholder.com/800x200" alt="Cheque" className="cheque-image" />
+
+              {/* Accept and Decline Buttons */}
+              <div className="cheque-action-buttons">
+                <button onClick={() => alert("Cheque Accepted")} className="accept-button">
+                  Accept
+                </button>
+                <button onClick={() => alert("Cheque Declined")} className="decline-button">
+                  Decline
+                </button>
+              </div>
+            </>
+          )
+        )}
+      </div>
+    )}
+  </div>
+)}
+
+
+
+
+
+
+
+
+
+
     </div>
   );
 };

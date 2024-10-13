@@ -409,5 +409,207 @@ body {
   }
 }
 
+/* Services sidebar */
+.services-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background-color: #1e1e1e;
+  color: white;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* Ensure it is above other elements */
+}
 
+.services-sidebar h2 {
+  margin-top: 0;
+}
+
+.services-sidebar button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #3c3c3c;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}
+
+.services-sidebar button:hover {
+  background-color: #007bff;
+}
+
+.service-status {
+  margin-top: 20px;
+  color: #ffffff;
+}
+
+/* Top bar for sidebar with close button */
+/* Top bar for sidebar with close button */
+.services-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.services-top-bar h2 {
+  flex-grow: 1;
+  margin: 0;
+}
+
+.close-button {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 10%;
+  max-width: 40px; /* Ensures it doesn't get too large */
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.close-button:hover {
+  background-color: darkred;
+}
+
+
+/* Cards layout for service selection */
+.services-cards {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.service-card {
+  background-color: #3c3c3c;
+  padding: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  background-color: #007bff;
+}
+
+/* Service status and cheque image */
+.service-status img.cheque-image {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 20px;
+  aspect-ratio: 4/1; /* Approximate cheque aspect ratio */
+}
+
+/* Cheque image */
+.cheque-image {
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 20px;
+  aspect-ratio: 4/1;
+}
+
+/* Action buttons - aligned to the right and taking 50% of the sidebar space */
+.cheque-action-buttons {
+  position: absolute; /* Positioned within the sidebar */
+  bottom: 20px; /* Position 20px from the bottom */
+  right: 0; /* Align to the right */
+  width: 50%; /* Only take up 50% of the available space */
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right within the container */
+  gap: 10px;
+  padding-right: 20px; /* Add padding to keep some space from the right edge */
+}
+
+.accept-button, .decline-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  flex: 1; /* Equal width for both buttons */
+}
+
+.accept-button {
+  background-color: green;
+  color: white;
+}
+
+.decline-button {
+  background-color: red;
+  color: white;
+}
+
+.accept-button:hover {
+  background-color: darkgreen;
+}
+
+.decline-button:hover {
+  background-color: darkred;
+}
+
+/* Service Dropdown */
+.service-dropdown {
+  display: flex;
+  align-items: center; /* Align label and dropdown vertically */
+  margin-bottom: 20px;
+}
+
+.service-dropdown label {
+  font-size: 16px;
+  margin-right: 10px;
+  color: white; /* Adjust if needed */
+}
+
+.service-dropdown select {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 200px; /* Restrict the width of the dropdown */
+}
+
+.service-dropdown select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Loader styles */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* Adjust height if necessary */
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
