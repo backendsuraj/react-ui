@@ -6,9 +6,12 @@ const Teams: React.FC = () => {
   const participants = [
     { id: 1, name: 'You' },
     { id: 2, name: 'Alice' },
-    // { id: 3, name: 'Bob' },
+    //{ id: 3, name: 'Bob' },
     // { id: 4, name: 'Charlie' },
     // { id: 5, name: 'Dave' },
+    // { id: 6, name: 'Eve' },
+    // { id: 6, name: 'Eve' },
+    // { id: 6, name: 'Eve' },
     // { id: 6, name: 'Eve' },
   ];
 
@@ -44,82 +47,66 @@ const Teams: React.FC = () => {
   };
 
   const renderParticipants = () => {
-    if (participants.length <= 2) {
-      if (participants.length === 1) {
-        return (
-          <div className="participant full">
-            <div className="video-placeholder">
-              <span className="initial">{participants[0].name.charAt(0)}</span>
-              <span className="full-name">{participants[0].name}</span>
-            </div>
-          </div>
-        );
-      } else {
-        const remoteParticipant = participants[1];
-        const localParticipant = participants[0];
-        return (
-          <div className="participant-container">
-            <div className="participant full">
-              <div className="video-placeholder">
-                <span className="initial">{remoteParticipant.name.charAt(0)}</span>
-                <span className="full-name">{remoteParticipant.name}</span>
-              </div>
-            </div>
-            <div className="participant local">
-              <div className="video-placeholder">
-                <span className="initial">{localParticipant.name.charAt(0)}</span>
-                <span className="full-name">{localParticipant.name}</span>
-              </div>
-            </div>
-          </div>
-        );
-      }
-    } else {
-      return (
-        <div className="carousel-wrapper">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <input
-              type="radio"
-              name="carousel"
-              id={`carousel-${i}`}
-              key={`input-${i}`}
-              defaultChecked={i === 0}
-            />
-          ))}
-
-          {Array.from({ length: totalPages }, (_, i) => {
-            const startIdx = i * participantsPerPage;
-            const endIdx = startIdx + participantsPerPage;
-            const pageParticipants = participants.slice(startIdx, endIdx);
-
-            return (
-              <div className="carousel-page" key={`page-${i}`}>
-                <div className="participants-grid">
-                  {pageParticipants.map((participant, idx) => (
-                    <div key={participant.id} className={`participant card ${idx === 3 ? 'speaking' : ''}`}>
-                      <div className="video-placeholder">
-                        <span className="initial">{participant.name.charAt(0)}</span>
-                        <span className="full-name">{participant.name}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-
-          <div className="carousel-navigation">
-            {Array.from({ length: totalPages }, (_, idx) => (
-              <label
-                key={`nav-${idx}`}
-                htmlFor={`carousel-${idx}`}
-                className="carousel-dot"
-              ></label>
-            ))}
+    const remoteParticipants = participants.slice(1); // Exclude local participant
+    const totalPages = Math.ceil(remoteParticipants.length / participantsPerPage);
+    const pagesArray = Array.from({ length: totalPages }, (_, i) => i);
+  
+    return (
+      <div className="participant-container">
+        {/* Always render local participant */}
+        <div className={`participant local ${remoteParticipants.length === 0 ? 'full' : ''}`}>
+          <div className="video-placeholder">
+            <span className="initial">{participants[0].name.charAt(0)}</span>
+            <span className="full-name">{participants[0].name}</span>
           </div>
         </div>
-      );
-    }
+  
+        {/* Render remote participants based on their count */}
+        {remoteParticipants.length === 0 ? null : remoteParticipants.length <= 2 ? (
+          remoteParticipants.map((participant) => (
+            <div key={participant.id} className={`participant ${remoteParticipants.length === 1 ? 'full' : 'half'}`}>
+              <div className="video-placeholder">
+                <span className="initial">{participant.name.charAt(0)}</span>
+                <span className="full-name">{participant.name}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="carousel-wrapper">
+            {pagesArray.map((pageIndex) => (
+              <>
+                <input
+                  type="radio"
+                  name="carousel"
+                  id={`carousel-${pageIndex}`}
+                  key={`input-${pageIndex}`}
+                  defaultChecked={pageIndex === 0}
+                />
+                <div className="carousel-page" key={`page-${pageIndex}`}>
+                  <div className="participants-grid">
+                    {remoteParticipants
+                      .slice(pageIndex * participantsPerPage, (pageIndex + 1) * participantsPerPage)
+                      .map((participant) => (
+                        <div key={participant.id} className="participant card">
+                          <div className="video-placeholder">
+                            <span className="initial">{participant.name.charAt(0)}</span>
+                            <span className="full-name">{participant.name}</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </>
+            ))}
+            <div className="carousel-navigation">
+              {pagesArray.map((pageIndex) => (
+                <label key={`nav-${pageIndex}`} htmlFor={`carousel-${pageIndex}`} className="carousel-dot"></label>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderChat = () => {

@@ -75,6 +75,7 @@ body {
   flex: 1;
   position: relative;
   display: flex;
+  z-index: 0; 
 }
 
 .participant {
@@ -85,12 +86,31 @@ body {
   flex: 1;
 }
 
+.participant.half {
+  width: 50%;
+}
+
+.carousel-wrapper {
+  display: flex;
+  overflow-x: scroll;
+}
+
 .participant.local {
   position: absolute;
   bottom: 20px;
   right: 20px;
   width: 200px;
   height: 150px;
+  z-index: 1000; /* Ensure local participant stays on top */
+}
+
+.participant.local.full {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  bottom: 0;  /* Remove bottom and right for full screen */
+  right: 0;
+  z-index: 1; /* Default when it's full screen */
 }
 
 .video-placeholder {
