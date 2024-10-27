@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Teams.css';
 
 const Teams: React.FC = () => {
@@ -12,7 +12,7 @@ const Teams: React.FC = () => {
     // { id: 6, name: 'Eve' },
     // { id: 6, name: 'Eve' },
     // { id: 6, name: 'Eve' },
-    // { id: 6, name: 'Eve' },
+    // { id: 6, name: 'Eve' },  
   ];
 
   const [simpleChatMessages, setSimpleChatMessages] = useState([
@@ -37,14 +37,36 @@ const Teams: React.FC = () => {
   const handleServiceSelection = (serviceType: string) => {
     setSelectedService(serviceType);
     if (serviceType === 'Cheque Deposit') {
-      // Simulate receiving the cheque image with loading
       setIsLoading(true);
       setTimeout(() => {
-        setChequeImage('/path-to-cheque-image.jpg'); // Replace with actual image path
+        setChequeImage('/path-to-cheque-image.jpg');
         setIsLoading(false);
       }, 3000); // Simulated delay for image receipt
+    } else if (serviceType === 'Cheque Encashment') {
+      setChequeEncashmentStage('cardInserted'); // Start encashment journey
     }
   };
+
+  const [chequeEncashmentStage, setChequeEncashmentStage] = useState<'loading' | 'cardInserted' | 'chequeInserted' | 'approval' | 'cashSelection' | 'success' | null>(null);
+
+useEffect(() => {
+  if (selectedService === 'Cheque Encashment') {
+    setChequeEncashmentStage('loading');
+    setTimeout(() => {
+      setChequeEncashmentStage('cardInserted');
+    }, 3000); // Simulate a 3-second delay for loading the card insertion
+  }
+}, [selectedService]);
+
+  const [cashDenominations, setCashDenominations] = useState([
+    { denomination: 100, quantity: 500 },
+    { denomination: 500, quantity: 200 },
+    { denomination: 2000, quantity: 50 },
+  ]);
+
+  const [notesToDispense, setNotesToDispense] = useState({ 100: 0, 500: 0, 2000: 0 });
+
+  
 
   const renderParticipants = () => {
     const remoteParticipants = participants.slice(1); // Exclude local participant
@@ -148,6 +170,100 @@ const Teams: React.FC = () => {
     }
   };
 
+  const renderChequeEncashmentJourney = () => {
+    switch (chequeEncashmentStage) {
+      case 'loading':
+        return (
+          <div className="loader-container">
+            <div className="loader"></div>
+            <p>Loading...</p>
+          </div>
+        );
+        case 'cardInserted':
+          setTimeout(() => setChequeEncashmentStage('chequeInserted'), 3000); // Automatically proceed after 3 seconds
+          return (
+            <div>
+              <h3>Debit Card Inserted</h3>
+              <div className="sample-card">
+                <div className="chip"></div> {/* Chip icon */}
+                <div className="card-number">1234 5678 9012 3456</div>
+                <div className="card-expiry">
+                  <span>Expiry: 12/25</span>
+                </div>
+                <div className="card-holder">
+                  <span>John Doe</span>
+                </div>
+                <div className="visa-logo">VISA</div> {/* Optional card logo */}
+              </div>
+            </div>
+          );        
+      case 'chequeInserted':
+        setTimeout(() => setChequeEncashmentStage('approval'), 3000); // Automatically proceed after 3 seconds
+        return (
+          <div>
+            <h3>Cheque Inserted</h3>
+            <div className="loader-container">
+              <div className="loader"></div>
+              <p>Verifying cheque...</p>
+            </div>
+          </div>
+        );
+      case 'approval':
+        setTimeout(() => setChequeEncashmentStage('cashSelection'), 3000); // Automatically proceed after 3 seconds
+        return (
+          <div>
+            <h3>Cheque Approved by Teller</h3>
+            <div className="loader-container">
+              <div className="loader"></div>
+              <p>Loading cash options...</p>
+            </div>
+          </div>
+        );
+      case 'cashSelection':
+        return (
+          <div>
+            <h3>Select the number of notes to dispense:</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Denomination</th>
+                  <th>Available</th>
+                  <th>Number to Dispense</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashDenominations.map((denomination) => (
+                  <tr key={denomination.denomination}>
+                    <td>{denomination.denomination}</td>
+                    <td>{denomination.quantity}</td>
+                    <td>
+                      <input
+                        type="text"
+                        value={notesToDispense[denomination.denomination]}
+                        onChange={(e) =>
+                          setNotesToDispense({
+                            ...notesToDispense,
+                            [denomination.denomination]: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button onClick={() => setChequeEncashmentStage('success')} className="accept-button">Dispense Cash</button>
+          </div>
+        );
+      case 'success':
+        return <h3>Cash dispensed successfully!</h3>;
+      default:
+        return null;
+    }
+  };
+  
+  
+
   return (
     <div className="teams-call-ui">
       <header className="header">
@@ -200,32 +316,7 @@ const Teams: React.FC = () => {
       </select>
     </div>
 
-    {selectedService && (
-      <div className="service-status">
-        <p>Selected Service: {selectedService}</p>
-        {isLoading ? (
-          <div className="loader-container">
-            <div className="loader"></div> {/* Loader */}
-          </div>
-        ) : (
-          chequeImage && (
-            <>
-              <img src="https://via.placeholder.com/800x200" alt="Cheque" className="cheque-image" />
-
-              {/* Accept and Decline Buttons */}
-              <div className="cheque-action-buttons">
-                <button onClick={() => alert("Cheque Accepted")} className="accept-button">
-                  Accept
-                </button>
-                <button onClick={() => alert("Cheque Declined")} className="decline-button">
-                  Decline
-                </button>
-              </div>
-            </>
-          )
-        )}
-      </div>
-    )}
+    {selectedService === 'Cheque Encashment' && renderChequeEncashmentJourney()}
   </div>
 )}
 
