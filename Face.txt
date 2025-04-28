@@ -249,3 +249,67 @@ export default class FaceMaskProcessor extends VideoTransformer<{}> {
     this.glPipeline?.cleanup();
   }
 }
+
+
+
+
+import { FaceLandmarker } from '@mediapipe/tasks-vision';
+
+// …
+
+async transform(frame: VideoFrame, controller: TransformStreamDefaultController<VideoFrame>) {
+  if (!this.glPipeline || !this.faceLandmarker) {
+    controller.enqueue(frame);
+    return;
+  }
+
+  // 1) Resize your offscreen
+  this.canvas!.width  = frame.displayWidth;
+  this.canvas!.height = frame.displayHeight;
+
+  // 2) Run MediaPipe
+  const nowMs = performance.now();
+  const results = this.faceLandmarker.detectForVideo(this.inputVideo!, nowMs);
+
+  // 3) If we got a face, build a fan of the face‐oval
+  const ovalIdx = FaceLandmarker.FACE_LANDMARKS_FACE_OVAL; 
+  if (results.faceLandmarks?.length) {
+    const lm = results.faceLandmarks[0];
+
+    // compute polygon center (average of oval points)
+    let cx = 0, cy = 0;
+    for (const i of ovalIdx) {
+      cx += lm[i].x;
+      cy += lm[i].y;
+    }
+    cx /= ovalIdx.length;
+    cy /= ovalIdx.length;
+
+    // build [ center, pt0, pt1, …, ptN−1, pt0 ] in clip-space
+    const verts = new Float32Array((ovalIdx.length + 2) * 2);
+    // center
+    verts[0] = cx * 2 - 1;
+    verts[1] = 1 - 2 * cy;
+    // boundary
+    for (let j = 0; j < ovalIdx.length; j++) {
+      const p = lm[ ovalIdx[j] ];
+      verts[2 * (j + 1)    ] = p.x * 2 - 1;
+      verts[2 * (j + 1) + 1] = 1 - 2 * p.y;
+    }
+    // close loop by repeating pt0
+    verts[2*(ovalIdx.length+1)    ] = verts[2*1    ];
+    verts[2*(ovalIdx.length+1) + 1] = verts[2*1 + 1];
+
+    // upload to GL and draw fan
+    this.glPipeline.updateFaceVertices(verts);
+    this.glPipeline.renderOverlay(ovalIdx.length + 2);
+  }
+
+  // 4) Draw the video itself
+  this.glPipeline.renderFrame(frame);
+
+  // 5) Emit new VideoFrame
+  const out = new VideoFrame(this.canvas!, { timestamp: frame.timestamp });
+  controller.enqueue(out);
+  frame.close();
+}
