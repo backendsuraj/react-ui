@@ -1,0 +1,251 @@
+1. src/webgl/shader-programs/faceMaskVertexShader.ts
+
+import { glsl } from '../utils';
+
+export const faceMaskVertexShader = glsl`#version 300 es
+in vec2 position;
+in vec2 attrUV;
+out vec2 vUV;
+
+void main() {
+  vUV = attrUV;
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+2. src/webgl/shader-programs/faceMaskFragmentShader.ts
+
+import { glsl } from '../utils';
+
+export const faceMaskFragmentShader = glsl`#version 300 es
+precision mediump float;
+
+in vec2 vUV;
+uniform sampler2D u_frame;
+out vec4 fragColor;
+
+void main() {
+  // just output the video
+  fragColor = texture(u_frame, vUV);
+}
+`;
+
+3. src/webgl/shader-programs/faceOverlayVertexShader.ts
+
+import { glsl } from '../utils';
+
+export const overlayVertexShader = glsl`#version 300 es
+in vec2 position;
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
+4. src/webgl/shader-programs/faceOverlayFragmentShader.ts
+
+import { glsl } from '../utils';
+
+export const overlayFragmentShader = glsl`#version 300 es
+precision mediump float;
+
+// Hard-coded purple mask at 40% opacity
+out vec4 fragColor;
+void main() {
+  fragColor = vec4(0.6, 0.0, 0.8, 0.4);
+}
+`;
+
+
+---
+
+5. src/webgl/setupWebGLFaceMask.ts
+
+import {
+  createProgram,
+  createShader,
+  createVertexBuffer,
+  initTexture,
+} from './utils';
+import { faceMaskVertexShader } from './shader-programs/faceMaskVertexShader';
+import { faceMaskFragmentShader } from './shader-programs/faceMaskFragmentShader';
+import { overlayVertexShader }     from './shader-programs/faceOverlayVertexShader';
+import { overlayFragmentShader }   from './shader-programs/faceOverlayFragmentShader';
+
+export function setupWebGLFaceMask(canvas: OffscreenCanvas) {
+  const gl = canvas.getContext('webgl2')!;
+  if (!gl) throw new Error('WebGL2 required');
+
+  // ----- compile programs -----
+  const vsFrame  = createShader(gl, gl.VERTEX_SHADER,   faceMaskVertexShader);
+  const fsFrame  = createShader(gl, gl.FRAGMENT_SHADER, faceMaskFragmentShader);
+  const progFrame= createProgram(gl, vsFrame, fsFrame);
+
+  const vsOvl    = createShader(gl, gl.VERTEX_SHADER,   overlayVertexShader);
+  const fsOvl    = createShader(gl, gl.FRAGMENT_SHADER, overlayFragmentShader);
+  const progOvl  = createProgram(gl, vsOvl, fsOvl);
+
+  // ----- fullscreen quad (two triangles) -----
+  //   positions in clip space + UVs
+  const quadData = new Float32Array([
+    //  position   UV
+    -1, -1,      0, 0,
+     1, -1,      1, 0,
+     1,  1,      1, 1,
+    -1, -1,      0, 0,
+     1,  1,      1, 1,
+    -1,  1,      0, 1,
+  ]);
+  const quadVBO = createVertexBuffer(gl);
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, quadData, gl.STATIC_DRAW);
+
+  // attribute offsets
+  const posLocFrame = gl.getAttribLocation(progFrame, 'position');
+  const uvLocFrame  = gl.getAttribLocation(progFrame, 'attrUV');
+
+  // overlay uses only position
+  const posLocOvl   = gl.getAttribLocation(progOvl, 'position');
+
+  // video texture
+  const frameTex = initTexture(gl, 0);
+
+  // dynamic VBO for the face polygon
+  const faceVBO = gl.createBuffer()!;
+
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  function updateFaceVertices(coords: Float32Array) {
+    // coords: [x0,y0, x1,y1, …] in clip space
+    gl.bindBuffer(gl.ARRAY_BUFFER, faceVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.DYNAMIC_DRAW);
+  }
+
+  function renderFrame(frame: VideoFrame) {
+    const w = frame.displayWidth, h = frame.displayHeight;
+    gl.viewport(0, 0, w, h);
+
+    // upload video frame
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, frameTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                  gl.UNSIGNED_BYTE, frame);
+
+    // draw the video fullscreen
+    gl.useProgram(progFrame);
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadVBO);
+    gl.enableVertexAttribArray(posLocFrame);
+    gl.vertexAttribPointer(posLocFrame, 2, gl.FLOAT, false, 16, 0);
+    gl.enableVertexAttribArray(uvLocFrame);
+    gl.vertexAttribPointer(uvLocFrame, 2, gl.FLOAT, false, 16, 8);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+
+  function renderOverlay(vertexCount: number) {
+    gl.useProgram(progOvl);
+    gl.bindBuffer(gl.ARRAY_BUFFER, faceVBO);
+    gl.enableVertexAttribArray(posLocOvl);
+    gl.vertexAttribPointer(posLocOvl, 2, gl.FLOAT, false, 8, 0);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexCount);
+  }
+
+  function cleanup() {
+    gl.deleteProgram(progFrame);
+    gl.deleteProgram(progOvl);
+    gl.deleteBuffer(quadVBO);
+    gl.deleteBuffer(faceVBO);
+    gl.deleteTexture(frameTex);
+  }
+
+  return { renderFrame, updateFaceVertices, renderOverlay, cleanup };
+}
+
+
+---
+
+6. src/transformers/FaceMaskProcessor.ts
+
+import * as vision from '@mediapipe/tasks-vision';
+import { dependencies } from '../../package.json';
+import VideoTransformer from './VideoTransformer';
+import { VideoTransformerInitOptions } from './types';
+import { setupWebGLFaceMask } from '../webgl/setupWebGLFaceMask';
+
+export default class FaceMaskProcessor extends VideoTransformer<{}> {
+  private faceLandmarker?: vision.FaceLandmarker;
+  private glPipeline?: ReturnType<typeof setupWebGLFaceMask>;
+
+  async init({ outputCanvas, inputElement }: VideoTransformerInitOptions) {
+    if (!(inputElement instanceof HTMLVideoElement)) {
+      throw new TypeError('Expected HTMLVideoElement');
+    }
+
+    // 1) create FaceLandmarker
+    const fs = await vision.FilesetResolver.forVisionTasks(
+      `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${dependencies['@mediapipe/tasks-vision']}/wasm`
+    );
+    this.faceLandmarker = await vision.FaceLandmarker.createFromOptions(fs, {
+      baseOptions: {
+        modelAssetPath:
+          'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+        delegate: 'GPU',
+      },
+      runningMode: 'VIDEO',
+      outputFaceBlendshapes: false,
+      outputFaceLandmarks: true,
+      numFaces: 1,
+    });
+
+    // 2) set up WebGL pipeline
+    this.transformer = new TransformStream({ transform: (f,c)=>this.transform(f,c) });
+    this.canvas = outputCanvas!;
+    this.glPipeline = setupWebGLFaceMask(this.canvas);
+    this.inputVideo = inputElement;
+    this.isDisabled = false;
+  }
+
+  async transform(frame: VideoFrame, controller: TransformStreamDefaultController<VideoFrame>) {
+    if (!this.glPipeline || !this.faceLandmarker) {
+      controller.enqueue(frame);
+      return;
+    }
+
+    this.canvas!.width  = frame.displayWidth;
+    this.canvas!.height = frame.displayHeight;
+
+    // 3) run face detection on this video frame
+    const now = performance.now();
+    const result = this.faceLandmarker.detectForVideo(this.inputVideo!, now);
+
+    // 4) convert landmarks to clip-space XY pairs
+    if (result.faceLandmarks?.length) {
+      const lm = result.faceLandmarks[0]; // single face
+      const coords = new Float32Array(lm.length * 2);
+      for (let i = 0; i < lm.length; i++) {
+        // lm[i].x/y are normalized [0,1], origin top-left
+        const x = lm[i].x * 2 - 1;
+        const y = 1 - 2 * lm[i].y;
+        coords[2*i  ] = x;
+        coords[2*i+1] = y;
+      }
+      this.glPipeline.updateFaceVertices(coords);
+    }
+
+    // 5) draw video + overlay polygon
+    this.glPipeline.renderFrame(frame);
+    if (result.faceLandmarks?.length) {
+      this.glPipeline.renderOverlay(result.faceLandmarks[0].length);
+    }
+
+    // 6) output new frame
+    const out = new VideoFrame(this.canvas!, { timestamp: frame.timestamp });
+    controller.enqueue(out);
+    frame.close();
+  }
+
+  async destroy() {
+    await super.destroy();
+    this.faceLandmarker?.close();
+    this.glPipeline?.cleanup();
+  }
+}
