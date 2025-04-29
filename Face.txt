@@ -323,3 +323,66 @@ const FACE_OVAL_INDICES = [
   172, 58,  132, 93,  234, 127, 162, 21,
   54,  103, 67,  109
 ];
+
+
+
+
+
+
+
+------
+
+
+
+function renderLandmarks(landmarkSets: Array<Array<{ x: number; y: number }>>) {
+  if (landmarkSets.length === 0) return;
+
+  gl.useProgram(landmarkProgram);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+
+  const facesDetected = landmarkSets.length; // <--- Add here
+
+  for (const landmarks of landmarkSets) {
+    const data = new Float32Array(landmarks.length * 2);
+    landmarks.forEach((pt, i) => {
+      data[i * 2 + 0] = pt.x;
+      data[i * 2 + 1] = pt.y;
+    });
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, landmarkVBO);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(uvLoc);
+    gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
+
+    connectorInfo.forEach(({ ebo, count, color }) => {
+      gl.uniform4fv(colorLoc, color);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+      gl.drawElements(gl.LINES, count, gl.UNSIGNED_SHORT, 0);
+    });
+
+    gl.uniform4fv(colorLoc, [1, 1, 1, 1]);
+    gl.drawArrays(gl.POINTS, 0, landmarks.length);
+  }
+
+  // ✅ After all faces drawn, overlay alert if needed
+  if (facesDetected > 2) {
+    const overlayVertices = new Float32Array([
+      -1.0, 0.9, // left-top
+      -1.0, 1.0, // left-very-top
+       1.0, 0.9, // right-top
+       1.0, 1.0  // right-very-top
+    ]);
+
+    const overlayBuffer = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, overlayBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, overlayVertices, gl.STATIC_DRAW);
+
+    gl.enableVertexAttribArray(uvLoc);
+    gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
+
+    gl.uniform4fv(colorLoc, [1.0, 0.0, 0.0, 0.7]); // semi-transparent red
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    gl.deleteBuffer(overlayBuffer);
+  }
+}
