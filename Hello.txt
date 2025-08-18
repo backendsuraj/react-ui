@@ -1,0 +1,100 @@
+import { getMongoRepository } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { Call } from './entities/Call';
+import { Agent } from './entities/Agent';
+
+const ANSWER_WINDOW_MS = 10_000;
+const MAX_CALL_AGE_MS = 3 * 60 * 1000;
+
+const addMs = (d: Date, ms: number) => new Date(d.getTime() + ms);
+
+export async function rebalanceOnce() {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - MAX_CALL_AGE_MS);
+
+  const callRepo = getMongoRepository(Call);
+  const agentRepo = getMongoRepository(Agent);
+
+  // ---- A) Expired ringing calls cleanup ----
+  const expiredCalls = await callRepo.find({
+    where: {
+      status: 'ringing',
+      expiresAt: { $lte: now },
+      createdAt: { $gte: cutoff }
+    },
+    order: { expiresAt: 1 }
+  });
+
+  if (expiredCalls.length) {
+    // Flip calls to queued
+    await Promise.all(
+      expiredCalls.map(c =>
+        callRepo.updateOne(
+          { _id: c._id, status: 'ringing', expiresAt: { $lte: now } },
+          { $set: { status: 'queued' } }
+        )
+      )
+    );
+
+    // Free their agents
+    await Promise.all(
+      expiredCalls
+        .filter(c => c.currentAgentId)
+        .map(c =>
+          agentRepo.updateOne(
+            { _id: c.currentAgentId, status: 'ringing', reservedCallId: c._id },
+            { $set: { status: 'available' }, $unset: { reservationUntil: '', reservedCallId: '' } }
+          )
+        )
+    );
+  }
+
+  // ---- B) Pair calls & agents ----
+  for (;;) {
+    const loopNow = new Date();
+    const until = addMs(loopNow, ANSWER_WINDOW_MS);
+
+    // 1) Reserve one available agent
+    const agent = await agentRepo.findOneAndUpdate(
+      { status: 'available' },
+      { $set: { status: 'ringing', reservationUntil: until } },
+      { sort: { lastAssignedAt: 1 }, returnDocument: 'after' }
+    );
+
+    if (!agent.value) break;
+
+    const agentId = agent.value._id as ObjectId;
+
+    // 2) Bind oldest eligible queued call
+    const call = await callRepo.findOneAndUpdate(
+      { status: 'queued', createdAt: { $gte: cutoff } },
+      {
+        $set: {
+          status: 'ringing',
+          currentAgentId: agentId,
+          assignedAt: loopNow,
+          expiresAt: until
+        },
+        $inc: { version: 1 }
+      },
+      { sort: { createdAt: 1 }, returnDocument: 'after' }
+    );
+
+    if (!call.value) {
+      // No calls → release agent
+      await agentRepo.updateOne(
+        { _id: agentId, status: 'ringing' },
+        { $set: { status: 'available' }, $unset: { reservationUntil: '', reservedCallId: '' } }
+      );
+      break;
+    }
+
+    // 3) (Optional) link agent → call
+    await agentRepo.updateOne(
+      { _id: agentId },
+      { $set: { reservedCallId: call.value._id } }
+    );
+  }
+
+  return { ok: true };
+}
